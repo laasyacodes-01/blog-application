@@ -1,0 +1,401 @@
+/* =========================
+   GENERAL
+========================= */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f7fb;
+    margin: 0;
+    color: #222;
+}
+
+
+/* =========================
+   NAVIGATION
+========================= */
+
+nav {
+    background-color: #222;
+    color: white;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 18px 40px;
+}
+
+nav h2 {
+    margin: 0;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin-left: 20px;
+}
+
+nav a:hover {
+    color: #00bcd4;
+}
+
+
+/* =========================
+   HOME HERO
+========================= */
+
+.hero {
+    text-align: center;
+    padding: 100px 20px;
+    background-color: white;
+}
+
+.hero h1 {
+    font-size: 48px;
+    color: #007bff;
+    margin-bottom: 15px;
+}
+
+.hero p {
+    font-size: 20px;
+    color: #555;
+    margin-bottom: 35px;
+}
+
+
+/* =========================
+   BUTTON
+========================= */
+
+.button {
+    display: inline-block;
+    background-color: #007bff;
+    color: white;
+    padding: 13px 28px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+.button:hover {
+    background-color: #0056b3;
+}
+
+
+/* =========================
+   ABOUT
+========================= */
+
+.about {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.about h2 {
+    color: #007bff;
+    font-size: 30px;
+}
+
+.about p {
+    max-width: 600px;
+    margin: auto;
+    line-height: 1.7;
+    color: #555;
+}
+
+
+/* =========================
+   FEATURES
+========================= */
+
+.features {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    padding: 20px 30px 70px;
+}
+
+.feature-card {
+    background-color: white;
+    width: 220px;
+    padding: 30px 25px;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card h2 {
+    color: #007bff;
+    margin-bottom: 15px;
+}
+
+.feature-card p {
+    color: #666;
+    line-height: 1.5;
+}
+
+
+/* =========================
+   HOME BLOGS
+========================= */
+
+.home-blogs {
+    padding: 60px 30px 80px;
+    text-align: center;
+}
+
+.home-blogs h2 {
+    color: #007bff;
+    font-size: 32px;
+    margin-bottom: 30px;
+}
+
+#homeBlogDisplay {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+}
+
+.home-blog-card {
+    background-color: white;
+    width: 280px;
+    padding: 25px;
+    text-align: left;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+}
+
+.home-blog-card h3 {
+    color: #007bff;
+    font-size: 22px;
+    margin-top: 0;
+    margin-bottom: 12px;
+}
+
+.home-blog-card p {
+    color: #555;
+    line-height: 1.6;
+}
+
+
+/* =========================
+   BLOG SEARCH
+========================= */
+
+.blog-search {
+    margin-bottom: 30px;
+}
+
+.blog-search input {
+    width: 80%;
+    max-width: 500px;
+    padding: 13px 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+
+/* =========================
+   FORMS
+========================= */
+
+.form-container {
+    width: 350px;
+    margin: 60px auto;
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-container h1 {
+    text-align: center;
+    color: #007bff;
+    margin-bottom: 25px;
+}
+
+.form-container label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.form-container input,
+.form-container textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+}
+
+.form-container textarea {
+    resize: vertical;
+}
+
+.form-container button {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.form-container button:hover {
+    background-color: #0056b3;
+}
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+.dashboard {
+    text-align: center;
+    padding: 50px 20px;
+}
+
+.dashboard h1 {
+    color: #007bff;
+}
+
+.dashboard > p {
+    font-size: 18px;
+    margin-bottom: 40px;
+}
+
+.dashboard-cards {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.dashboard-card {
+    background-color: white;
+    width: 200px;
+    padding: 30px 20px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-card h2 {
+    color: #007bff;
+}
+
+
+/* =========================
+   PUBLISHED BLOG
+========================= */
+
+#blogDisplay {
+    margin-top: 30px;
+}
+
+#blogDisplay .dashboard-card {
+    background-color: white;
+    padding: 30px !important;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+    width: 80% !important;
+    max-width: 600px;
+    margin: 30px auto !important;
+    text-align: left !important;
+}
+
+#blogDisplay .dashboard-card h2 {
+    color: #007bff;
+    font-size: 28px;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+#blogDisplay .dashboard-card p {
+    color: #555;
+    line-height: 1.7;
+    margin-bottom: 15px;
+}
+
+#blogDisplay button {
+    padding: 10px 20px !important;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+#blogDisplay button:hover {
+    opacity: 0.85;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 600px) {
+
+    nav {
+        flex-direction: column;
+        gap: 15px;
+        padding: 20px;
+    }
+
+    nav a {
+        margin: 8px;
+    }
+
+    .hero h1 {
+        font-size: 34px;
+    }
+
+    .features {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .feature-card {
+        width: 75%;
+    }
+
+    .form-container {
+        width: 80%;
+    }
+
+    .dashboard-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .dashboard-card {
+        width: 75%;
+    }
+
+    #blogDisplay .dashboard-card {
+        width: 75% !important;
+    }
+
+    #homeBlogDisplay {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .home-blog-card {
+        width: 90%;
+    }
+
+    .blog-search input {
+        width: 90%;
+    }
+}

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard - My Blog</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/script.js" defer></script>
+</head>
+
+<body>
+
+    <nav>
+
+        <h2>My Blog</h2>
+
+        <div>
+
+            <a href="index.html">Home</a>
+
+            <a href="dashboard.html">Dashboard</a>
+
+            <a href="create-blog.html">Create Blog</a>
+
+            <a href="login.html">Logout</a>
+
+        </div>
+
+    </nav>
+
+
+    <section class="dashboard">
+
+        <h1>My Dashboard</h1>
+
+        <p>
+            Welcome to your blog dashboard.
+        </p>
+
+
+        <!-- Dashboard Counters -->
+
+        <div class="dashboard-cards">
+
+            <div class="dashboard-card">
+
+                <h2 id="totalBlogs">0</h2>
+
+                <p>Total Blogs</p>
+
+            </div>
+
+
+            <div class="dashboard-card">
+
+                <h2 id="publishedBlogs">0</h2>
+
+                <p>Published Blogs</p>
+
+            </div>
+
+
+            <div class="dashboard-card">
+
+                <h2 id="draftBlogs">0</h2>
+
+                <p>Drafts</p>
+
+            </div>
+
+        </div>
+
+
+        <!-- Blog Search -->
+
+        <div class="blog-search">
+
+            <input
+                type="text"
+                id="searchBlog"
+                placeholder="Search blogs..."
+            >
+
+        </div>
+
+
+        <!-- Blog List -->
+
+        <div id="blogDisplay"></div>
+
+
+        <!-- Create Blog -->
+
+        <a href="create-blog.html" class="button">
+
+            Create New Blog
+
+        </a>
+
+    </section>
+
+</body>
+
+</html>
