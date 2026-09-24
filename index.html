@@ -8,7 +8,6 @@
     <title>My Blog</title>
 
     <link rel="stylesheet" href="css/style.css">
-    <script src="js/script.js" defer></script>
 </head>
 
 <body>
@@ -125,6 +124,90 @@
         <div id="homeBlogDisplay"></div>
 
     </section>
+
+
+    <!-- Backend Connection -->
+
+    <script>
+
+        async function loadHomeBlogs() {
+
+            const homeBlogDisplay =
+                document.getElementById("homeBlogDisplay");
+
+
+            try {
+
+                const response = await fetch(
+                    "http://localhost:5000/api/blogs"
+                );
+
+
+                const data = await response.json();
+
+
+                const blogs = data.blogs || [];
+
+
+                homeBlogDisplay.innerHTML = "";
+
+
+                if (blogs.length === 0) {
+
+                    homeBlogDisplay.innerHTML =
+                        "<p>No blogs published yet.</p>";
+
+                    return;
+
+                }
+
+
+                blogs.forEach(function(blog) {
+
+                    const blogCard =
+                        document.createElement("div");
+
+
+                    blogCard.className =
+                        "blog-card";
+
+
+                    blogCard.innerHTML = `
+
+                        <h3>${blog.title}</h3>
+
+                        <p>
+                            <strong>Category:</strong>
+                            ${blog.category}
+                        </p>
+
+                        <p>
+                            ${blog.content}
+                        </p>
+
+                    `;
+
+
+                    homeBlogDisplay.appendChild(blogCard);
+
+                });
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                homeBlogDisplay.innerHTML =
+                    "<p>Unable to connect to the backend server.</p>";
+
+            }
+
+        }
+
+
+        loadHomeBlogs();
+
+    </script>
 
 
 </body>

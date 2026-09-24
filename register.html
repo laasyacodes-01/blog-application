@@ -1,36 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Register - My Blog</title>
+    <title>Register - Blog Application</title>
 
     <link rel="stylesheet" href="css/style.css">
-    <script src="js/script.js" defer></script>
 </head>
 
 <body>
 
-    <nav>
-        <h2>My Blog</h2>
+    <div class="container">
 
-        <div>
-            <a href="index.html">Home</a>
-            <a href="login.html">Login</a>
-            <a href="register.html">Register</a>
-        </div>
-    </nav>
-
-
-    <section class="form-container">
-
-        <h1>Create Account</h1>
+        <h1>Register</h1>
 
         <form id="registerForm">
-
-            <label for="name">Full Name</label>
 
             <input
                 type="text"
@@ -39,46 +23,96 @@
                 required
             >
 
-            <label for="registerEmail">Email</label>
-
             <input
                 type="email"
-                id="registerEmail"
+                id="email"
                 placeholder="Enter your email"
                 required
             >
 
-            <label for="registerPassword">Password</label>
-
             <input
                 type="password"
-                id="registerPassword"
-                placeholder="Create a password"
+                id="password"
+                placeholder="Enter your password"
                 required
             >
 
-            <label for="confirmPassword">Confirm Password</label>
-
-            <input
-                type="password"
-                id="confirmPassword"
-                placeholder="Confirm your password"
-                required
-            >
-
-            <button type="submit">
-                Register
-            </button>
+            <button type="submit">Register</button>
 
         </form>
 
+        <p id="message"></p>
+
         <p>
             Already have an account?
-            <a href="login.html">Login here</a>
+            <a href="login.html">Login</a>
         </p>
 
-    </section>
+    </div>
+
+
+    <script>
+
+        const registerForm = document.getElementById("registerForm");
+
+        registerForm.addEventListener("submit", async function(event) {
+
+            event.preventDefault();
+
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            const message = document.getElementById("message");
+
+
+            try {
+
+                const response = await fetch(
+                    "http://localhost:5000/api/register",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            name: name,
+                            email: email,
+                            password: password
+                        })
+                    }
+                );
+
+
+                const data = await response.json();
+
+
+                if (response.ok) {
+
+                    message.textContent = data.message;
+
+                    registerForm.reset();
+
+                } else {
+
+                    message.textContent = data.message;
+
+                }
+
+            } catch (error) {
+
+                message.textContent =
+                    "Unable to connect to the backend server.";
+
+                console.error(error);
+
+            }
+
+        });
+
+    </script>
 
 </body>
-
 </html>

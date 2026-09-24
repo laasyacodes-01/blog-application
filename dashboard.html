@@ -8,7 +8,6 @@
     <title>Dashboard - My Blog</title>
 
     <link rel="stylesheet" href="css/style.css">
-    <script src="js/script.js" defer></script>
 </head>
 
 <body>
@@ -101,6 +100,170 @@
         </a>
 
     </section>
+
+
+    <script>
+
+        let allBlogs = [];
+
+
+        // Get blogs from backend
+
+        async function loadBlogs() {
+
+            const blogDisplay =
+                document.getElementById("blogDisplay");
+
+
+            try {
+
+                const response = await fetch(
+                    "http://localhost:5000/api/blogs"
+                );
+
+
+                const data = await response.json();
+
+
+                allBlogs = data.blogs || [];
+
+
+                displayBlogs(allBlogs);
+
+
+                updateCounters(allBlogs);
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                blogDisplay.innerHTML =
+                    "<p>Unable to connect to the backend server.</p>";
+
+            }
+
+        }
+
+
+        // Display blogs
+
+        function displayBlogs(blogs) {
+
+            const blogDisplay =
+                document.getElementById("blogDisplay");
+
+
+            blogDisplay.innerHTML = "";
+
+
+            if (blogs.length === 0) {
+
+                blogDisplay.innerHTML =
+                    "<p>No blogs found.</p>";
+
+                return;
+
+            }
+
+
+            blogs.forEach(function(blog) {
+
+                const blogCard =
+                    document.createElement("div");
+
+
+                blogCard.className =
+                    "blog-card";
+
+
+                blogCard.innerHTML = `
+
+                    <h2>${blog.title}</h2>
+
+                    <p>
+                        <strong>Category:</strong>
+                        ${blog.category}
+                    </p>
+
+                    <p>
+                        ${blog.content}
+                    </p>
+
+                `;
+
+
+                blogDisplay.appendChild(blogCard);
+
+            });
+
+        }
+
+
+        // Update dashboard counters
+
+        function updateCounters(blogs) {
+
+            document.getElementById("totalBlogs").textContent =
+                blogs.length;
+
+
+            document.getElementById("publishedBlogs").textContent =
+                blogs.length;
+
+
+            document.getElementById("draftBlogs").textContent =
+                0;
+
+        }
+
+
+        // Search blogs
+
+        document
+            .getElementById("searchBlog")
+            .addEventListener("input", function() {
+
+                const searchText =
+                    this.value.toLowerCase();
+
+
+                const filteredBlogs =
+                    allBlogs.filter(function(blog) {
+
+                        return (
+
+                            blog.title
+                                .toLowerCase()
+                                .includes(searchText)
+
+                            ||
+
+                            blog.category
+                                .toLowerCase()
+                                .includes(searchText)
+
+                            ||
+
+                            blog.content
+                                .toLowerCase()
+                                .includes(searchText)
+
+                        );
+
+                    });
+
+
+                displayBlogs(filteredBlogs);
+
+            });
+
+
+        // Load blogs when page opens
+
+        loadBlogs();
+
+    </script>
 
 </body>
 
