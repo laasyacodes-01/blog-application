@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Blog Details - My Blog</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        .blog-details {
+            max-width: 800px;
+            margin: 60px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .blog-details h1 {
+            margin-bottom: 20px;
+        }
+
+        .blog-meta {
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .blog-content {
+            line-height: 1.8;
+            font-size: 18px;
+            white-space: pre-wrap;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .back-button:hover {
+            background: #0056b3;
+        }
+
+        #message {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="create-blog.html">Create Blog</a>
+        <a href="login.html">Login</a>
+    </nav>
+
+    <!-- Blog Details -->
+    <div class="blog-details" id="blogDetails">
+
+        <h1 id="blogTitle">Loading...</h1>
+
+        <div class="blog-meta">
+            <p>
+                <strong>Author:</strong>
+                <span id="blogAuthor"></span>
+            </p>
+
+            <p>
+                <strong>Published:</strong>
+                <span id="blogDate"></span>
+            </p>
+        </div>
+
+        <hr>
+
+        <div class="blog-content" id="blogContent"></div>
+
+        <a href="index.html" class="back-button">
+            ← Back to Home
+        </a>
+
+    </div>
+
+    <div id="message"></div>
+
+    <script>
+        const API_URL = "http://localhost:5000";
+
+        async function loadBlog() {
+
+            const params = new URLSearchParams(window.location.search);
+            const blogId = params.get("id");
+
+            if (!blogId) {
+                document.getElementById("blogDetails").style.display = "none";
+
+                document.getElementById("message").textContent =
+                    "Blog ID not found.";
+
+                return;
+            }
+
+            try {
+
+                const response = await fetch(
+                    `${API_URL}/api/blogs/${blogId}`
+                );
+
+                const blog = await response.json();
+
+                if (!response.ok) {
+
+                    document.getElementById("blogDetails").style.display =
+                        "none";
+
+                    document.getElementById("message").textContent =
+                        blog.message || "Blog not found.";
+
+                    return;
+                }
+
+                document.getElementById("blogTitle").textContent =
+                    blog.title;
+
+                document.getElementById("blogAuthor").textContent =
+                    blog.author;
+
+                document.getElementById("blogContent").textContent =
+                    blog.content;
+
+                document.getElementById("blogDate").textContent =
+                    new Date(blog.created_at).toLocaleDateString();
+
+            } catch (error) {
+
+                console.error(error);
+
+                document.getElementById("blogDetails").style.display =
+                    "none";
+
+                document.getElementById("message").textContent =
+                    "Unable to load blog. Please make sure the backend is running.";
+            }
+        }
+
+        loadBlog();
+    </script>
+
+</body>
+</html>

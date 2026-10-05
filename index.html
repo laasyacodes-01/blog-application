@@ -135,24 +135,22 @@
             const homeBlogDisplay =
                 document.getElementById("homeBlogDisplay");
 
-
             try {
 
                 const response = await fetch(
                     "http://localhost:5000/api/blogs"
                 );
 
+                if (!response.ok) {
+                    throw new Error("Failed to fetch blogs");
+                }
 
-                const data = await response.json();
-
-
-                const blogs = data.blogs || [];
-
+                const blogs = await response.json();
 
                 homeBlogDisplay.innerHTML = "";
 
 
-                if (blogs.length === 0) {
+                if (!blogs || blogs.length === 0) {
 
                     homeBlogDisplay.innerHTML =
                         "<p>No blogs published yet.</p>";
@@ -162,11 +160,10 @@
                 }
 
 
-                blogs.forEach(function(blog) {
+                blogs.forEach(function (blog) {
 
                     const blogCard =
                         document.createElement("div");
-
 
                     blogCard.className =
                         "blog-card";
@@ -177,13 +174,19 @@
                         <h3>${blog.title}</h3>
 
                         <p>
-                            <strong>Category:</strong>
-                            ${blog.category}
+                            <strong>Author:</strong>
+                            ${blog.author}
                         </p>
 
                         <p>
                             ${blog.content}
                         </p>
+
+                        <a
+                            href="blog-details.html?id=${blog.id}"
+                            class="button">
+                            Read More
+                        </a>
 
                     `;
 

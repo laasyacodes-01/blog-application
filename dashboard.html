@@ -12,108 +12,47 @@
 
 <body>
 
+    <!-- Navigation -->
     <nav>
 
         <h2>My Blog</h2>
 
         <div>
-
             <a href="index.html">Home</a>
-
             <a href="dashboard.html">Dashboard</a>
-
             <a href="create-blog.html">Create Blog</a>
-
-            <a href="login.html">Logout</a>
-
+            <a href="login.html">Login</a>
         </div>
 
     </nav>
 
 
+    <!-- Dashboard -->
+
     <section class="dashboard">
 
         <h1>My Dashboard</h1>
 
-        <p>
-            Welcome to your blog dashboard.
-        </p>
+        <p>Total Blogs: <span id="totalBlogs">0</span></p>
 
+        <div id="blogList">
 
-        <!-- Dashboard Counters -->
-
-        <div class="dashboard-cards">
-
-            <div class="dashboard-card">
-
-                <h2 id="totalBlogs">0</h2>
-
-                <p>Total Blogs</p>
-
-            </div>
-
-
-            <div class="dashboard-card">
-
-                <h2 id="publishedBlogs">0</h2>
-
-                <p>Published Blogs</p>
-
-            </div>
-
-
-            <div class="dashboard-card">
-
-                <h2 id="draftBlogs">0</h2>
-
-                <p>Drafts</p>
-
-            </div>
+            <p>Loading blogs...</p>
 
         </div>
-
-
-        <!-- Blog Search -->
-
-        <div class="blog-search">
-
-            <input
-                type="text"
-                id="searchBlog"
-                placeholder="Search blogs..."
-            >
-
-        </div>
-
-
-        <!-- Blog List -->
-
-        <div id="blogDisplay"></div>
-
-
-        <!-- Create Blog -->
-
-        <a href="create-blog.html" class="button">
-
-            Create New Blog
-
-        </a>
 
     </section>
 
 
     <script>
 
-        let allBlogs = [];
-
-
-        // Get blogs from backend
-
         async function loadBlogs() {
 
-            const blogDisplay =
-                document.getElementById("blogDisplay");
+            const blogList =
+                document.getElementById("blogList");
 
+            const totalBlogs =
+                document.getElementById("totalBlogs");
 
             try {
 
@@ -121,145 +60,84 @@
                     "http://localhost:5000/api/blogs"
                 );
 
+                if (!response.ok) {
+                    throw new Error("Failed to fetch blogs");
+                }
 
-                const data = await response.json();
+                const blogs = await response.json();
+
+                console.log("Blogs received:", blogs);
+
+                totalBlogs.textContent = blogs.length;
+
+                blogList.innerHTML = "";
 
 
-                allBlogs = data.blogs || [];
+                if (blogs.length === 0) {
+
+                    blogList.innerHTML =
+                        "<p>No blogs found.</p>";
+
+                    return;
+                }
 
 
-                displayBlogs(allBlogs);
+                blogs.forEach(function (blog) {
+
+                    const blogCard =
+                        document.createElement("div");
+
+                    blogCard.className = "blog-card";
 
 
-                updateCounters(allBlogs);
+                    blogCard.innerHTML = `
+
+                        <h2>${blog.title}</h2>
+
+                        <p>
+                            <strong>Author:</strong>
+                            ${blog.author}
+                        </p>
+
+                        <p>
+                            ${blog.content}
+                        </p>
+
+                        <p>
+                            <strong>Published:</strong>
+                            ${new Date(blog.created_at)
+                                .toLocaleDateString()}
+                        </p>
+
+                        <a
+                            href="blog-details.html?id=${blog.id}"
+                            class="button">
+                            Read More
+                        </a>
+
+                    `;
+
+
+                    blogList.appendChild(blogCard);
+
+                });
 
 
             } catch (error) {
 
-                console.error(error);
+                console.error("Dashboard error:", error);
 
-                blogDisplay.innerHTML =
-                    "<p>Unable to connect to the backend server.</p>";
-
-            }
-
-        }
-
-
-        // Display blogs
-
-        function displayBlogs(blogs) {
-
-            const blogDisplay =
-                document.getElementById("blogDisplay");
-
-
-            blogDisplay.innerHTML = "";
-
-
-            if (blogs.length === 0) {
-
-                blogDisplay.innerHTML =
-                    "<p>No blogs found.</p>";
-
-                return;
-
-            }
-
-
-            blogs.forEach(function(blog) {
-
-                const blogCard =
-                    document.createElement("div");
-
-
-                blogCard.className =
-                    "blog-card";
-
-
-                blogCard.innerHTML = `
-
-                    <h2>${blog.title}</h2>
-
+                blogList.innerHTML = `
                     <p>
-                        <strong>Category:</strong>
-                        ${blog.category}
+                        Unable to load blogs.
+                        Please make sure the backend server is running.
                     </p>
-
-                    <p>
-                        ${blog.content}
-                    </p>
-
                 `;
 
-
-                blogDisplay.appendChild(blogCard);
-
-            });
+            }
 
         }
 
-
-        // Update dashboard counters
-
-        function updateCounters(blogs) {
-
-            document.getElementById("totalBlogs").textContent =
-                blogs.length;
-
-
-            document.getElementById("publishedBlogs").textContent =
-                blogs.length;
-
-
-            document.getElementById("draftBlogs").textContent =
-                0;
-
-        }
-
-
-        // Search blogs
-
-        document
-            .getElementById("searchBlog")
-            .addEventListener("input", function() {
-
-                const searchText =
-                    this.value.toLowerCase();
-
-
-                const filteredBlogs =
-                    allBlogs.filter(function(blog) {
-
-                        return (
-
-                            blog.title
-                                .toLowerCase()
-                                .includes(searchText)
-
-                            ||
-
-                            blog.category
-                                .toLowerCase()
-                                .includes(searchText)
-
-                            ||
-
-                            blog.content
-                                .toLowerCase()
-                                .includes(searchText)
-
-                        );
-
-                    });
-
-
-                displayBlogs(filteredBlogs);
-
-            });
-
-
-        // Load blogs when page opens
 
         loadBlogs();
 
