@@ -60,6 +60,16 @@
             color: white;
         }
 
+        .logout-button {
+            background: #333;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
         .edit-button:hover {
             background: #ec971f;
         }
@@ -70,6 +80,10 @@
 
         .read-button:hover {
             background: #0056b3;
+        }
+
+        .logout-button:hover {
+            background: #111;
         }
 
         #message {
@@ -96,7 +110,11 @@
 
             <a href="create-blog.html">Create Blog</a>
 
-            <a href="login.html">Login</a>
+            <button
+                class="logout-button"
+                onclick="logout()">
+                Logout
+            </button>
 
         </div>
 
@@ -108,6 +126,11 @@
     <section class="dashboard">
 
         <h1>My Dashboard</h1>
+
+        <p>
+            Welcome,
+            <strong id="userName"></strong>
+        </p>
 
         <p>
             Total Blogs:
@@ -129,6 +152,36 @@
 
         const API_URL = "http://localhost:5000";
 
+        // ==================== CHECK LOGIN ====================
+
+        const token =
+            localStorage.getItem("token");
+
+        const loggedInUser =
+            localStorage.getItem("loggedInUser");
+
+
+        if (!token) {
+
+            window.location.href =
+                "login.html";
+
+        }
+
+
+        // ==================== SHOW USER NAME ====================
+
+        if (loggedInUser) {
+
+            const user =
+                JSON.parse(loggedInUser);
+
+            document.getElementById(
+                "userName"
+            ).textContent = user.name;
+
+        }
+
 
         // ==================== LOAD BLOGS ====================
 
@@ -143,26 +196,63 @@
             try {
 
                 const response = await fetch(
-                    `${API_URL}/api/blogs`
+                    `${API_URL}/api/blogs`,
+                    {
+                        method: "GET",
+
+                        headers: {
+                            "Authorization":
+                                `Bearer ${token}`
+                        }
+                    }
                 );
 
-                if (!response.ok) {
-                    throw new Error("Failed to fetch blogs");
+
+                // Token invalid or expired
+
+                if (response.status === 401 ||
+                    response.status === 403) {
+
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("loggedInUser");
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
                 }
 
-                const blogs = await response.json();
 
-                console.log("Blogs received:", blogs);
+                if (!response.ok) {
 
-                totalBlogs.textContent = blogs.length;
+                    throw new Error(
+                        "Failed to fetch blogs"
+                    );
+
+                }
+
+
+                const blogs =
+                    await response.json();
+
+
+                console.log(
+                    "My blogs:",
+                    blogs
+                );
+
+
+                totalBlogs.textContent =
+                    blogs.length;
 
                 blogList.innerHTML = "";
 
 
-                if (!blogs || blogs.length === 0) {
+                if (!blogs ||
+                    blogs.length === 0) {
 
                     blogList.innerHTML =
-                        "<p>No blogs found.</p>";
+                        "<p>No blogs found. Create your first blog!</p>";
 
                     return;
 
@@ -174,7 +264,8 @@
                     const blogCard =
                         document.createElement("div");
 
-                    blogCard.className = "blog-card";
+                    blogCard.className =
+                        "blog-card";
 
 
                     blogCard.innerHTML = `
@@ -221,7 +312,9 @@
                     `;
 
 
-                    blogList.appendChild(blogCard);
+                    blogList.appendChild(
+                        blogCard
+                    );
 
                 });
 
@@ -250,6 +343,7 @@
                     "Are you sure you want to delete this blog?"
                 );
 
+
             if (!confirmDelete) {
                 return;
             }
@@ -257,16 +351,36 @@
 
             try {
 
-                const response = await fetch(
-                    `${API_URL}/api/blogs/${id}`,
-                    {
-                        method: "DELETE"
-                    }
-                );
+                const response =
+                    await fetch(
+                        `${API_URL}/api/blogs/${id}`,
+                        {
+                            method: "DELETE",
+
+                            headers: {
+                                "Authorization":
+                                    `Bearer ${token}`
+                            }
+                        }
+                    );
 
 
                 const result =
                     await response.json();
+
+
+                if (response.status === 401 ||
+                    response.status === 403) {
+
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("loggedInUser");
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
+
+                }
 
 
                 if (!response.ok) {
@@ -301,6 +415,24 @@
                 );
 
             }
+
+        }
+
+
+        // ==================== LOGOUT ====================
+
+        function logout() {
+
+            localStorage.removeItem(
+                "token"
+            );
+
+            localStorage.removeItem(
+                "loggedInUser"
+            );
+
+            window.location.href =
+                "login.html";
 
         }
 

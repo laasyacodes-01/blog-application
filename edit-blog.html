@@ -116,7 +116,7 @@
             <input
                 type="text"
                 id="author"
-                required
+                readonly
             >
 
 
@@ -145,13 +145,30 @@
 
     <script>
 
-        const API_URL = "http://localhost:5000";
+        const API_URL =
+            "http://localhost:5000";
 
 
-        // Get blog ID from URL
+        // ==================== CHECK LOGIN ====================
+
+        const token =
+            localStorage.getItem("token");
+
+
+        if (!token) {
+
+            window.location.href =
+                "login.html";
+
+        }
+
+
+        // ==================== GET BLOG ID ====================
 
         const urlParams =
-            new URLSearchParams(window.location.search);
+            new URLSearchParams(
+                window.location.search
+            );
 
         const blogId =
             urlParams.get("id");
@@ -163,7 +180,9 @@
 
             if (!blogId) {
 
-                document.getElementById("message").textContent =
+                document.getElementById(
+                    "message"
+                ).textContent =
                     "Blog ID not found.";
 
                 return;
@@ -173,9 +192,41 @@
 
             try {
 
-                const response = await fetch(
-                    `${API_URL}/api/blogs/${blogId}`
-                );
+                const response =
+                    await fetch(
+                        `${API_URL}/api/blogs/${blogId}`,
+                        {
+                            method: "GET",
+
+                            headers: {
+                                "Authorization":
+                                    `Bearer ${token}`
+                            }
+                        }
+                    );
+
+
+                // Token expired or invalid
+
+                if (
+                    response.status === 401 ||
+                    response.status === 403
+                ) {
+
+                    localStorage.removeItem(
+                        "token"
+                    );
+
+                    localStorage.removeItem(
+                        "loggedInUser"
+                    );
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
+
+                }
 
 
                 if (!response.ok) {
@@ -191,14 +242,19 @@
                     await response.json();
 
 
-                document.getElementById("title").value =
-                    blog.title;
+                document.getElementById(
+                    "title"
+                ).value = blog.title;
 
-                document.getElementById("author").value =
-                    blog.author;
 
-                document.getElementById("content").value =
-                    blog.content;
+                document.getElementById(
+                    "author"
+                ).value = blog.author;
+
+
+                document.getElementById(
+                    "content"
+                ).value = blog.content;
 
 
             } catch (error) {
@@ -208,7 +264,9 @@
                     error
                 );
 
-                document.getElementById("message").textContent =
+                document.getElementById(
+                    "message"
+                ).textContent =
                     "Unable to load blog.";
 
             }
@@ -220,79 +278,113 @@
 
         document
             .getElementById("editForm")
-            .addEventListener("submit", async function (event) {
+            .addEventListener(
+                "submit",
+                async function(event) {
 
-                event.preventDefault();
-
-
-                const title =
-                    document.getElementById("title").value;
-
-                const author =
-                    document.getElementById("author").value;
-
-                const content =
-                    document.getElementById("content").value;
+                    event.preventDefault();
 
 
-                try {
+                    const title =
+                        document.getElementById(
+                            "title"
+                        ).value;
 
-                    const response = await fetch(
-                        `${API_URL}/api/blogs/${blogId}`,
-                        {
-                            method: "PUT",
+                    const content =
+                        document.getElementById(
+                            "content"
+                        ).value;
 
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
 
-                            body: JSON.stringify({
-                                title: title,
-                                author: author,
-                                content: content
-                            })
+                    try {
+
+                        const response =
+                            await fetch(
+                                `${API_URL}/api/blogs/${blogId}`,
+                                {
+                                    method: "PUT",
+
+                                    headers: {
+                                        "Content-Type":
+                                            "application/json",
+
+                                        "Authorization":
+                                            `Bearer ${token}`
+                                    },
+
+                                    body: JSON.stringify({
+                                        title: title,
+                                        content: content
+                                    })
+                                }
+                            );
+
+
+                        const result =
+                            await response.json();
+
+
+                        // Token expired or invalid
+
+                        if (
+                            response.status === 401 ||
+                            response.status === 403
+                        ) {
+
+                            localStorage.removeItem(
+                                "token"
+                            );
+
+                            localStorage.removeItem(
+                                "loggedInUser"
+                            );
+
+                            window.location.href =
+                                "login.html";
+
+                            return;
+
                         }
-                    );
 
 
-                    const result =
-                        await response.json();
+                        if (!response.ok) {
+
+                            document.getElementById(
+                                "message"
+                            ).textContent =
+                                result.message ||
+                                "Failed to update blog.";
+
+                            return;
+
+                        }
 
 
-                    if (!response.ok) {
+                        alert(
+                            "Blog updated successfully!"
+                        );
 
-                        document.getElementById("message").textContent =
-                            result.message ||
-                            "Failed to update blog.";
 
-                        return;
+                        window.location.href =
+                            "dashboard.html";
+
+
+                    } catch (error) {
+
+                        console.error(
+                            "Update error:",
+                            error
+                        );
+
+                        document.getElementById(
+                            "message"
+                        ).textContent =
+                            "Unable to update blog.";
 
                     }
 
-
-                    alert(
-                        "Blog updated successfully!"
-                    );
-
-
-                    window.location.href =
-                        "dashboard.html";
-
-
-                } catch (error) {
-
-                    console.error(
-                        "Update error:",
-                        error
-                    );
-
-                    document.getElementById("message").textContent =
-                        "Unable to update blog.";
-
                 }
-
-            });
+            );
 
 
         // ==================== START ====================

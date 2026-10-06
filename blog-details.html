@@ -7,128 +7,99 @@
     <title>Blog Details - My Blog</title>
 
     <link rel="stylesheet" href="css/style.css">
-
-    <style>
-        .blog-details {
-            max-width: 800px;
-            margin: 60px auto;
-            padding: 30px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .blog-details h1 {
-            margin-bottom: 20px;
-        }
-
-        .blog-meta {
-            margin-bottom: 20px;
-            color: #555;
-        }
-
-        .blog-content {
-            line-height: 1.8;
-            font-size: 18px;
-            white-space: pre-wrap;
-        }
-
-        .back-button {
-            display: inline-block;
-            margin-top: 30px;
-            padding: 10px 20px;
-            background: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-
-        .back-button:hover {
-            background: #0056b3;
-        }
-
-        #message {
-            text-align: center;
-            margin-top: 50px;
-            font-size: 18px;
-        }
-    </style>
 </head>
 
 <body>
 
     <!-- Navigation -->
     <nav>
+        <h2>My Blog</h2>
+
         <a href="index.html">Home</a>
         <a href="dashboard.html">Dashboard</a>
         <a href="create-blog.html">Create Blog</a>
-        <a href="login.html">Login</a>
+        <a href="#" onclick="logout()">Logout</a>
     </nav>
 
+
     <!-- Blog Details -->
-    <div class="blog-details" id="blogDetails">
+    <div class="container">
 
         <h1 id="blogTitle">Loading...</h1>
 
-        <div class="blog-meta">
-            <p>
-                <strong>Author:</strong>
-                <span id="blogAuthor"></span>
-            </p>
+        <p>
+            <strong>Author:</strong>
+            <span id="blogAuthor"></span>
+        </p>
 
-            <p>
-                <strong>Published:</strong>
-                <span id="blogDate"></span>
-            </p>
-        </div>
+        <p>
+            <strong>Date:</strong>
+            <span id="blogDate"></span>
+        </p>
 
         <hr>
 
-        <div class="blog-content" id="blogContent"></div>
+        <div id="blogContent"></div>
 
-        <a href="index.html" class="back-button">
-            ← Back to Home
-        </a>
+        <br>
+
+        <button onclick="goBack()">Back to Dashboard</button>
 
     </div>
 
-    <div id="message"></div>
 
     <script>
-        const API_URL = "http://localhost:5000";
 
+        // Check login
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            window.location.href = "login.html";
+        }
+
+
+        // Get blog ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const blogId = urlParams.get("id");
+
+
+        // Load blog
         async function loadBlog() {
-
-            const params = new URLSearchParams(window.location.search);
-            const blogId = params.get("id");
-
-            if (!blogId) {
-                document.getElementById("blogDetails").style.display = "none";
-
-                document.getElementById("message").textContent =
-                    "Blog ID not found.";
-
-                return;
-            }
 
             try {
 
                 const response = await fetch(
-                    `${API_URL}/api/blogs/${blogId}`
+                    `http://localhost:5000/api/blogs/${blogId}`,
+                    {
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    }
                 );
 
-                const blog = await response.json();
 
-                if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
 
-                    document.getElementById("blogDetails").style.display =
-                        "none";
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("loggedInUser");
 
-                    document.getElementById("message").textContent =
-                        blog.message || "Blog not found.";
+                    window.location.href = "login.html";
 
                     return;
                 }
+
+
+                if (!response.ok) {
+
+                    document.getElementById("blogTitle").textContent =
+                        "Blog not found.";
+
+                    return;
+                }
+
+
+                const blog = await response.json();
+
 
                 document.getElementById("blogTitle").textContent =
                     blog.title;
@@ -140,21 +111,43 @@
                     blog.content;
 
                 document.getElementById("blogDate").textContent =
-                    new Date(blog.created_at).toLocaleDateString();
+                    new Date(blog.created_at).toLocaleString();
 
-            } catch (error) {
-
-                console.error(error);
-
-                document.getElementById("blogDetails").style.display =
-                    "none";
-
-                document.getElementById("message").textContent =
-                    "Unable to load blog. Please make sure the backend is running.";
             }
+
+            catch (error) {
+
+                console.error("Error loading blog:", error);
+
+                document.getElementById("blogTitle").textContent =
+                    "Failed to load blog.";
+
+            }
+
         }
 
+
+        // Back to dashboard
+        function goBack() {
+
+            window.location.href = "dashboard.html";
+
+        }
+
+
+        // Logout
+        function logout() {
+
+            localStorage.removeItem("token");
+            localStorage.removeItem("loggedInUser");
+
+            window.location.href = "login.html";
+
+        }
+
+
         loadBlog();
+
     </script>
 
 </body>

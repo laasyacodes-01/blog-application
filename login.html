@@ -57,7 +57,6 @@
 
             const message = document.getElementById("message");
 
-
             try {
 
                 const response = await fetch(
@@ -76,22 +75,34 @@
                     }
                 );
 
-
                 const data = await response.json();
-
 
                 if (response.ok) {
 
-                    message.textContent = data.message;
+                    // Save JWT token
+                    localStorage.setItem(
+                        "token",
+                        data.token
+                    );
 
+                    // Save user information
                     localStorage.setItem(
                         "loggedInUser",
                         JSON.stringify(data.user)
                     );
 
+                    message.textContent =
+                        "Login successful!";
+
+                    // Open dashboard
+                    setTimeout(function() {
+                        window.location.href = "dashboard.html";
+                    }, 1000);
+
                 } else {
 
-                    message.textContent = data.message;
+                    message.textContent =
+                        data.message;
 
                 }
 

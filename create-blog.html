@@ -52,64 +52,125 @@
 
     <script>
 
-        const blogForm = document.getElementById("blogForm");
+        const blogForm =
+            document.getElementById("blogForm");
 
-        blogForm.addEventListener("submit", async function(event) {
-
-            event.preventDefault();
-
-            const title = document.getElementById("title").value;
-            const category = document.getElementById("category").value;
-            const content = document.getElementById("content").value;
-
-            const message = document.getElementById("message");
+        const message =
+            document.getElementById("message");
 
 
-            try {
+        // ==================== CHECK LOGIN ====================
 
-                const response = await fetch(
-                    "http://localhost:5000/api/blogs",
-                    {
-                        method: "POST",
+        const token =
+            localStorage.getItem("token");
 
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
 
-                        body: JSON.stringify({
-                            title: title,
-                            category: category,
-                            content: content
-                        })
+        if (!token) {
+
+            window.location.href =
+                "login.html";
+
+        }
+
+
+        // ==================== CREATE BLOG ====================
+
+        blogForm.addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+                const title =
+                    document.getElementById("title").value;
+
+                const content =
+                    document.getElementById("content").value;
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "http://localhost:5000/api/blogs",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json",
+
+                                    "Authorization":
+                                        `Bearer ${token}`
+                                },
+
+                                body: JSON.stringify({
+                                    title: title,
+                                    content: content
+                                })
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    // ====================
+                    // TOKEN ERROR
+                    // ====================
+
+                    if (
+                        response.status === 401 ||
+                        response.status === 403
+                    ) {
+
+                        localStorage.removeItem(
+                            "token"
+                        );
+
+                        localStorage.removeItem(
+                            "loggedInUser"
+                        );
+
+                        window.location.href =
+                            "login.html";
+
+                        return;
+
                     }
-                );
 
 
-                const data = await response.json();
+                    // ====================
+                    // SUCCESS
+                    // ====================
+
+                    if (response.ok) {
+
+                        message.textContent =
+                            data.message;
+
+                        blogForm.reset();
+
+                    } else {
+
+                        message.textContent =
+                            data.message;
+
+                    }
 
 
-                if (response.ok) {
+                } catch (error) {
 
-                    message.textContent = data.message;
+                    message.textContent =
+                        "Unable to connect to the backend server.";
 
-                    blogForm.reset();
-
-                } else {
-
-                    message.textContent = data.message;
+                    console.error(error);
 
                 }
 
-            } catch (error) {
-
-                message.textContent =
-                    "Unable to connect to the backend server.";
-
-                console.error(error);
-
             }
-
-        });
+        );
 
     </script>
 

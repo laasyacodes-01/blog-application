@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Profile - My Blog</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <h2>My Blog</h2>
+
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="create-blog.html">Create Blog</a>
+        <a href="profile.html">Profile</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </nav>
+
+
+    <!-- Profile -->
+    <div class="container">
+
+        <h1>My Profile</h1>
+
+        <hr>
+
+        <p>
+            <strong>Name:</strong>
+            <span id="profileName"></span>
+        </p>
+
+        <p>
+            <strong>Email:</strong>
+            <span id="profileEmail"></span>
+        </p>
+
+        <p>
+            <strong>Account:</strong>
+            <span>Active</span>
+        </p>
+
+        <br>
+
+        <button onclick="goToDashboard()">
+            Back to Dashboard
+        </button>
+
+    </div>
+
+
+    <script>
+
+        // Check login
+        const token = localStorage.getItem("token");
+        const storedUser = localStorage.getItem("loggedInUser");
+
+        if (!token || !storedUser) {
+
+            window.location.href = "login.html";
+
+        } else {
+
+            // Get logged-in user
+            const user = JSON.parse(storedUser);
+
+            // Display user information
+            document.getElementById("profileName").textContent =
+                user.name;
+
+            document.getElementById("profileEmail").textContent =
+                user.email;
+        }
+
+
+        // Go to dashboard
+        function goToDashboard() {
+
+            window.location.href = "dashboard.html";
+
+        }
+
+
+        // Logout
+        function logout() {
+
+            localStorage.removeItem("token");
+            localStorage.removeItem("loggedInUser");
+
+            window.location.href = "login.html";
+
+        }
+
+    </script>
+
+</body>
+</html>

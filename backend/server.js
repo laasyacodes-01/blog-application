@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const { createClient } = require("@supabase/supabase-js");
 require("dotenv").config();
 
@@ -139,8 +140,21 @@ app.post("/api/login", async (req, res) => {
             });
         }
 
+        const token = jwt.sign(
+            {
+                id: user.id,
+                email: user.email,
+                name: user.name
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1h"
+            }
+        );
+
         res.json({
             message: "Login successful!",
+            token: token,
             user: {
                 id: user.id,
                 name: user.name,
@@ -158,11 +172,75 @@ app.post("/api/login", async (req, res) => {
     }
 });
 
+// ==================== JWT AUTHENTICATION ====================
+
+function authenticateToken(req, res, next) {
+
+    const authHeader = req.headers["authorization"];
+
+    const token = authHeader && authHeader.split(" ")[1];
+
+    if (!token) {
+        return res.status(401).json({
+            message: "Access denied. Please login."
+        });
+    }
+
+    jwt.verify(
+        token,
+        process.env.JWT_SECRET,
+        (error, user) => {
+
+            if (error) {
+                return res.status(403).json({
+                    message: "Invalid or expired token."
+                });
+            }
+
+            req.user = user;
+
+            next();
+        }
+    );
+}
+
+// ==================== USER PROFILE ====================
+
+app.get("/api/profile", authenticateToken, async (req, res) => {
+    try {
+
+        const { data, error } = await supabase
+            .from("users")
+            .select("id, name, email, created_at")
+            .eq("id", req.user.id)
+            .single();
+
+        if (error) {
+            console.log("PROFILE ERROR:", error);
+
+            return res.status(500).json({
+                message: "Failed to load profile.",
+                error: error.message
+            });
+        }
+
+        res.json(data);
+
+    } catch (error) {
+
+        console.log("PROFILE ERROR:", error);
+
+        res.status(500).json({
+            message: "Failed to load profile."
+        });
+    }
+});
+
 // ==================== CREATE BLOG ====================
 
-app.post("/api/blogs", async (req, res) => {
+app.post("/api/blogs", authenticateToken, async (req, res) => {
     try {
-        const { title, content, author } = req.body;
+        const { title, content } = req.body;
 
         if (!title || !content) {
             return res.status(400).json({
@@ -175,7 +253,8 @@ app.post("/api/blogs", async (req, res) => {
             .insert({
                 title: title,
                 content: content,
-                author: author || "Anonymous"
+                author: req.user.name,
+                user_id: req.user.id
             })
             .select("*");
 
@@ -197,19 +276,20 @@ app.post("/api/blogs", async (req, res) => {
         console.log("CREATE BLOG ERROR:", error);
 
         res.status(500).json({
-            message: "Failed to create blog.",
-            error: error.message
+            message: "Failed to create blog."
         });
     }
 });
 
-// ==================== GET ALL BLOGS ====================
+// ==================== GET ALL USER BLOGS ====================
 
-app.get("/api/blogs", async (req, res) => {
+app.get("/api/blogs", authenticateToken, async (req, res) => {
     try {
+
         const { data, error } = await supabase
             .from("blogs")
             .select("*")
+            .eq("user_id", req.user.id)
             .order("created_at", {
                 ascending: false
             });
@@ -226,6 +306,7 @@ app.get("/api/blogs", async (req, res) => {
         res.json(data);
 
     } catch (error) {
+
         console.log("GET BLOGS ERROR:", error);
 
         res.status(500).json({
@@ -234,16 +315,18 @@ app.get("/api/blogs", async (req, res) => {
     }
 });
 
-// ==================== GET ONE BLOG ====================
+// ==================== GET SINGLE BLOG ====================
 
-app.get("/api/blogs/:id", async (req, res) => {
+app.get("/api/blogs/:id", authenticateToken, async (req, res) => {
     try {
+
         const { id } = req.params;
 
         const { data, error } = await supabase
             .from("blogs")
             .select("*")
-            .eq("id", id);
+            .eq("id", id)
+            .eq("user_id", req.user.id);
 
         if (error) {
             console.log("GET ONE BLOG ERROR:", error);
@@ -263,6 +346,7 @@ app.get("/api/blogs/:id", async (req, res) => {
         res.json(data[0]);
 
     } catch (error) {
+
         console.log("GET ONE BLOG ERROR:", error);
 
         res.status(500).json({
@@ -273,10 +357,11 @@ app.get("/api/blogs/:id", async (req, res) => {
 
 // ==================== UPDATE BLOG ====================
 
-app.put("/api/blogs/:id", async (req, res) => {
+app.put("/api/blogs/:id", authenticateToken, async (req, res) => {
     try {
+
         const { id } = req.params;
-        const { title, content, author } = req.body;
+        const { title, content } = req.body;
 
         if (!title || !content) {
             return res.status(400).json({
@@ -289,9 +374,10 @@ app.put("/api/blogs/:id", async (req, res) => {
             .update({
                 title: title,
                 content: content,
-                author: author || "Anonymous"
+                author: req.user.name
             })
             .eq("id", id)
+            .eq("user_id", req.user.id)
             .select("*");
 
         if (error) {
@@ -315,25 +401,27 @@ app.put("/api/blogs/:id", async (req, res) => {
         });
 
     } catch (error) {
+
         console.log("UPDATE BLOG ERROR:", error);
 
         res.status(500).json({
-            message: "Failed to update blog.",
-            error: error.message
+            message: "Failed to update blog."
         });
     }
 });
 
 // ==================== DELETE BLOG ====================
 
-app.delete("/api/blogs/:id", async (req, res) => {
+app.delete("/api/blogs/:id", authenticateToken, async (req, res) => {
     try {
+
         const { id } = req.params;
 
         const { data, error } = await supabase
             .from("blogs")
             .delete()
             .eq("id", id)
+            .eq("user_id", req.user.id)
             .select("*");
 
         if (error) {
@@ -357,11 +445,11 @@ app.delete("/api/blogs/:id", async (req, res) => {
         });
 
     } catch (error) {
+
         console.log("DELETE BLOG ERROR:", error);
 
         res.status(500).json({
-            message: "Failed to delete blog.",
-            error: error.message
+            message: "Failed to delete blog."
         });
     }
 });
