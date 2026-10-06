@@ -7,11 +7,14 @@ require("dotenv").config();
 const app = express();
 const PORT = 5000;
 
-// Supabase
+// ==================== SUPABASE ====================
+
 const supabase = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SECRET_KEY
 );
+
+// ==================== MIDDLEWARE ====================
 
 app.use(cors());
 app.use(express.json());
@@ -36,7 +39,6 @@ app.post("/api/register", async (req, res) => {
             });
         }
 
-        // Check existing user
         const { data: users, error: checkError } = await supabase
             .from("users")
             .select("id, email")
@@ -57,10 +59,8 @@ app.post("/api/register", async (req, res) => {
             });
         }
 
-        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insert user
         const { data, error: insertError } = await supabase
             .from("users")
             .insert({
@@ -267,6 +267,101 @@ app.get("/api/blogs/:id", async (req, res) => {
 
         res.status(500).json({
             message: "Failed to fetch blog."
+        });
+    }
+});
+
+// ==================== UPDATE BLOG ====================
+
+app.put("/api/blogs/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, content, author } = req.body;
+
+        if (!title || !content) {
+            return res.status(400).json({
+                message: "Title and content are required."
+            });
+        }
+
+        const { data, error } = await supabase
+            .from("blogs")
+            .update({
+                title: title,
+                content: content,
+                author: author || "Anonymous"
+            })
+            .eq("id", id)
+            .select("*");
+
+        if (error) {
+            console.log("UPDATE BLOG ERROR:", error);
+
+            return res.status(500).json({
+                message: "Failed to update blog.",
+                error: error.message
+            });
+        }
+
+        if (!data || data.length === 0) {
+            return res.status(404).json({
+                message: "Blog not found."
+            });
+        }
+
+        res.json({
+            message: "Blog updated successfully!",
+            blog: data[0]
+        });
+
+    } catch (error) {
+        console.log("UPDATE BLOG ERROR:", error);
+
+        res.status(500).json({
+            message: "Failed to update blog.",
+            error: error.message
+        });
+    }
+});
+
+// ==================== DELETE BLOG ====================
+
+app.delete("/api/blogs/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const { data, error } = await supabase
+            .from("blogs")
+            .delete()
+            .eq("id", id)
+            .select("*");
+
+        if (error) {
+            console.log("DELETE BLOG ERROR:", error);
+
+            return res.status(500).json({
+                message: "Failed to delete blog.",
+                error: error.message
+            });
+        }
+
+        if (!data || data.length === 0) {
+            return res.status(404).json({
+                message: "Blog not found."
+            });
+        }
+
+        res.json({
+            message: "Blog deleted successfully!",
+            blog: data[0]
+        });
+
+    } catch (error) {
+        console.log("DELETE BLOG ERROR:", error);
+
+        res.status(500).json({
+            message: "Failed to delete blog.",
+            error: error.message
         });
     }
 });

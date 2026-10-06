@@ -8,20 +8,96 @@
     <title>Dashboard - My Blog</title>
 
     <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        .dashboard {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .blog-card {
+            background: white;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .blog-card h2 {
+            margin-bottom: 10px;
+        }
+
+        .blog-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .action-button {
+            display: inline-block;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .edit-button {
+            background: #f0ad4e;
+            color: white;
+        }
+
+        .delete-button {
+            background: #d9534f;
+            color: white;
+        }
+
+        .read-button {
+            background: #007bff;
+            color: white;
+        }
+
+        .edit-button:hover {
+            background: #ec971f;
+        }
+
+        .delete-button:hover {
+            background: #c9302c;
+        }
+
+        .read-button:hover {
+            background: #0056b3;
+        }
+
+        #message {
+            margin: 20px 0;
+            font-weight: bold;
+        }
+    </style>
+
 </head>
 
 <body>
 
     <!-- Navigation -->
+
     <nav>
 
         <h2>My Blog</h2>
 
         <div>
+
             <a href="index.html">Home</a>
+
             <a href="dashboard.html">Dashboard</a>
+
             <a href="create-blog.html">Create Blog</a>
+
             <a href="login.html">Login</a>
+
         </div>
 
     </nav>
@@ -33,7 +109,12 @@
 
         <h1>My Dashboard</h1>
 
-        <p>Total Blogs: <span id="totalBlogs">0</span></p>
+        <p>
+            Total Blogs:
+            <span id="totalBlogs">0</span>
+        </p>
+
+        <div id="message"></div>
 
         <div id="blogList">
 
@@ -46,6 +127,11 @@
 
     <script>
 
+        const API_URL = "http://localhost:5000";
+
+
+        // ==================== LOAD BLOGS ====================
+
         async function loadBlogs() {
 
             const blogList =
@@ -57,7 +143,7 @@
             try {
 
                 const response = await fetch(
-                    "http://localhost:5000/api/blogs"
+                    `${API_URL}/api/blogs`
                 );
 
                 if (!response.ok) {
@@ -73,12 +159,13 @@
                 blogList.innerHTML = "";
 
 
-                if (blogs.length === 0) {
+                if (!blogs || blogs.length === 0) {
 
                     blogList.innerHTML =
                         "<p>No blogs found.</p>";
 
                     return;
+
                 }
 
 
@@ -109,11 +196,27 @@
                                 .toLocaleDateString()}
                         </p>
 
-                        <a
-                            href="blog-details.html?id=${blog.id}"
-                            class="button">
-                            Read More
-                        </a>
+                        <div class="blog-actions">
+
+                            <a
+                                href="blog-details.html?id=${blog.id}"
+                                class="action-button read-button">
+                                Read More
+                            </a>
+
+                            <a
+                                href="edit-blog.html?id=${blog.id}"
+                                class="action-button edit-button">
+                                Edit
+                            </a>
+
+                            <button
+                                class="action-button delete-button"
+                                onclick="deleteBlog(${blog.id})">
+                                Delete
+                            </button>
+
+                        </div>
 
                     `;
 
@@ -125,19 +228,84 @@
 
             } catch (error) {
 
-                console.error("Dashboard error:", error);
+                console.error(
+                    "Dashboard error:",
+                    error
+                );
 
-                blogList.innerHTML = `
-                    <p>
-                        Unable to load blogs.
-                        Please make sure the backend server is running.
-                    </p>
-                `;
+                blogList.innerHTML =
+                    "<p>Unable to load blogs. Please make sure the backend server is running.</p>";
 
             }
 
         }
 
+
+        // ==================== DELETE BLOG ====================
+
+        async function deleteBlog(id) {
+
+            const confirmDelete =
+                confirm(
+                    "Are you sure you want to delete this blog?"
+                );
+
+            if (!confirmDelete) {
+                return;
+            }
+
+
+            try {
+
+                const response = await fetch(
+                    `${API_URL}/api/blogs/${id}`,
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+
+                const result =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    alert(
+                        result.message ||
+                        "Failed to delete blog."
+                    );
+
+                    return;
+
+                }
+
+
+                alert(
+                    "Blog deleted successfully!"
+                );
+
+
+                loadBlogs();
+
+
+            } catch (error) {
+
+                console.error(
+                    "Delete error:",
+                    error
+                );
+
+                alert(
+                    "Unable to delete blog."
+                );
+
+            }
+
+        }
+
+
+        // ==================== START ====================
 
         loadBlogs();
 

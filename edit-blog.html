@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Blog - My Blog</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        .edit-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .edit-form {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .edit-form label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .edit-form input,
+        .edit-form textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .edit-form textarea {
+            min-height: 200px;
+            resize: vertical;
+        }
+
+        .update-button {
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .update-button:hover {
+            background: #218838;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+
+    <nav>
+
+        <h2>My Blog</h2>
+
+        <div>
+
+            <a href="index.html">Home</a>
+
+            <a href="dashboard.html">Dashboard</a>
+
+            <a href="create-blog.html">Create Blog</a>
+
+            <a href="login.html">Login</a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- Edit Blog -->
+
+    <section class="edit-container">
+
+        <h1>Edit Blog</h1>
+
+        <form id="editForm" class="edit-form">
+
+            <label for="title">
+                Blog Title
+            </label>
+
+            <input
+                type="text"
+                id="title"
+                required
+            >
+
+
+            <label for="author">
+                Author
+            </label>
+
+            <input
+                type="text"
+                id="author"
+                required
+            >
+
+
+            <label for="content">
+                Blog Content
+            </label>
+
+            <textarea
+                id="content"
+                required
+            ></textarea>
+
+
+            <button
+                type="submit"
+                class="update-button">
+                Update Blog
+            </button>
+
+            <div id="message"></div>
+
+        </form>
+
+    </section>
+
+
+    <script>
+
+        const API_URL = "http://localhost:5000";
+
+
+        // Get blog ID from URL
+
+        const urlParams =
+            new URLSearchParams(window.location.search);
+
+        const blogId =
+            urlParams.get("id");
+
+
+        // ==================== LOAD BLOG ====================
+
+        async function loadBlog() {
+
+            if (!blogId) {
+
+                document.getElementById("message").textContent =
+                    "Blog ID not found.";
+
+                return;
+
+            }
+
+
+            try {
+
+                const response = await fetch(
+                    `${API_URL}/api/blogs/${blogId}`
+                );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Failed to load blog"
+                    );
+
+                }
+
+
+                const blog =
+                    await response.json();
+
+
+                document.getElementById("title").value =
+                    blog.title;
+
+                document.getElementById("author").value =
+                    blog.author;
+
+                document.getElementById("content").value =
+                    blog.content;
+
+
+            } catch (error) {
+
+                console.error(
+                    "Load blog error:",
+                    error
+                );
+
+                document.getElementById("message").textContent =
+                    "Unable to load blog.";
+
+            }
+
+        }
+
+
+        // ==================== UPDATE BLOG ====================
+
+        document
+            .getElementById("editForm")
+            .addEventListener("submit", async function (event) {
+
+                event.preventDefault();
+
+
+                const title =
+                    document.getElementById("title").value;
+
+                const author =
+                    document.getElementById("author").value;
+
+                const content =
+                    document.getElementById("content").value;
+
+
+                try {
+
+                    const response = await fetch(
+                        `${API_URL}/api/blogs/${blogId}`,
+                        {
+                            method: "PUT",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                title: title,
+                                author: author,
+                                content: content
+                            })
+                        }
+                    );
+
+
+                    const result =
+                        await response.json();
+
+
+                    if (!response.ok) {
+
+                        document.getElementById("message").textContent =
+                            result.message ||
+                            "Failed to update blog.";
+
+                        return;
+
+                    }
+
+
+                    alert(
+                        "Blog updated successfully!"
+                    );
+
+
+                    window.location.href =
+                        "dashboard.html";
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Update error:",
+                        error
+                    );
+
+                    document.getElementById("message").textContent =
+                        "Unable to update blog.";
+
+                }
+
+            });
+
+
+        // ==================== START ====================
+
+        loadBlog();
+
+    </script>
+
+</body>
+
+</html>
