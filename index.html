@@ -4,215 +4,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>My Blog</title>
-
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-    <!-- Navigation -->
-
     <nav>
-
         <h2>My Blog</h2>
-
         <div>
-
             <a href="index.html">Home</a>
-
             <a href="dashboard.html">Dashboard</a>
-
             <a href="create-blog.html">Create Blog</a>
-
             <a href="login.html">Login</a>
-
             <a href="register.html">Register</a>
-
         </div>
-
     </nav>
 
-
-    <!-- Hero Section -->
-
     <section class="hero">
-
-        <h1>
-            Welcome to My Blog
-        </h1>
-
-        <p>
-            Read, write and share your thoughts with the world.
-        </p>
-
-        <a
-            href="create-blog.html"
-            class="button">
-            Start Writing
-        </a>
-
+        <h1>Welcome to My Blog</h1>
+        <p>Read, write and share your thoughts with the world.</p>
+        <a href="create-blog.html" class="button">Start Writing</a>
     </section>
 
-
-    <!-- About Section -->
-
     <section class="about">
-
-        <h2>
-            Share Your Ideas
-        </h2>
-
+        <h2>Share Your Ideas</h2>
         <p>
             Create your own blogs, share your ideas,
             and keep your thoughts organized in one place.
         </p>
-
     </section>
-
-
-    <!-- Features -->
 
     <section class="features">
 
         <div class="feature-card">
-
             <h2>✍️ Write</h2>
-
-            <p>
-                Create and publish your own blog posts.
-            </p>
-
+            <p>Create and publish your own blog posts.</p>
         </div>
 
-
         <div class="feature-card">
-
             <h2>📖 Read</h2>
-
-            <p>
-                Read interesting blog posts
-                and discover new ideas.
-            </p>
-
+            <p>Read interesting blog posts and discover new ideas.</p>
         </div>
 
-
         <div class="feature-card">
-
             <h2>🚀 Share</h2>
-
-            <p>
-                Share your ideas and stories
-                with others.
-            </p>
-
+            <p>Share your ideas and stories with others.</p>
         </div>
 
     </section>
-
-
-    <!-- Published Blogs -->
 
     <section class="home-blogs">
-
-        <h2>
-            Latest Blogs
-        </h2>
-
+        <h2>Latest Blogs</h2>
         <div id="homeBlogDisplay"></div>
-
     </section>
 
-
-    <!-- Backend Connection -->
-
     <script>
-
         async function loadHomeBlogs() {
 
-            const homeBlogDisplay =
-                document.getElementById("homeBlogDisplay");
+            const display = document.getElementById("homeBlogDisplay");
+            const token = localStorage.getItem("token");
+
+            // Require login before displaying blogs.
+            if (!token) {
+                display.innerHTML = `
+                    <div class="blog-card">
+                        <p>Please log in to view the latest blogs.</p>
+                        <a href="login.html" class="button">Login</a>
+                    </div>
+                `;
+                return;
+            }
 
             try {
-
                 const response = await fetch(
-                    "https://blog-application-2-ig7h.onrender.com/api/blogs"
+                    "https://blog-application-2-ig7h.onrender.com/api/blogs",
+                    {
+                        method: "GET",
+                        headers: {
+                            "Authorization": "Bearer " + token
+                        }
+                    }
                 );
 
+                if (response.status === 401 || response.status === 403) {
+                    display.innerHTML = `
+                        <div class="blog-card">
+                            <p>Your login session has expired. Please log in again.</p>
+                            <a href="login.html" class="button">Login</a>
+                        </div>
+                    `;
+                    return;
+                }
+
                 if (!response.ok) {
-                    throw new Error("Failed to fetch blogs");
+                    throw new Error("Unable to fetch blogs");
                 }
 
                 const blogs = await response.json();
 
-                homeBlogDisplay.innerHTML = "";
-
+                display.innerHTML = "";
 
                 if (!blogs || blogs.length === 0) {
-
-                    homeBlogDisplay.innerHTML =
-                        "<p>No blogs published yet.</p>";
-
+                    display.innerHTML = "<p>No blogs found in your account.</p>";
                     return;
-
                 }
-
 
                 blogs.forEach(function (blog) {
 
-                    const blogCard =
-                        document.createElement("div");
+                    const card = document.createElement("div");
+                    card.className = "blog-card";
 
-                    blogCard.className =
-                        "blog-card";
+                    const title = document.createElement("h3");
+                    title.textContent = blog.title || "Untitled";
 
+                    const author = document.createElement("p");
+                    author.textContent = "Author: " + (blog.author || "Unknown");
 
-                    blogCard.innerHTML = `
+                    const content = document.createElement("p");
+                    const fullContent = blog.content || "";
+                    content.textContent = fullContent.length > 150
+                        ? fullContent.substring(0, 150) + "..."
+                        : fullContent;
 
-                        <h3>${blog.title}</h3>
+                    const link = document.createElement("a");
+                    link.href = "blog-details.html?id=" + encodeURIComponent(blog.id);
+                    link.className = "button";
+                    link.textContent = "Read More";
 
-                        <p>
-                            <strong>Author:</strong>
-                            ${blog.author}
-                        </p>
+                    card.appendChild(title);
+                    card.appendChild(author);
+                    card.appendChild(content);
+                    card.appendChild(link);
 
-                        <p>
-                            ${blog.content}
-                        </p>
-
-                        <a
-                            href="blog-details.html?id=${blog.id}"
-                            class="button">
-                            Read More
-                        </a>
-
-                    `;
-
-
-                    homeBlogDisplay.appendChild(blogCard);
-
+                    display.appendChild(card);
                 });
 
-
             } catch (error) {
+                console.error("Home blogs error:", error);
 
-                console.error(error);
-
-                homeBlogDisplay.innerHTML =
-                    "<p>Unable to connect to the backend server.</p>";
-
+                display.innerHTML = `
+                    <div class="blog-card">
+                        <p>Unable to load blogs right now. Please try again later.</p>
+                    </div>
+                `;
             }
-
         }
 
-
         loadHomeBlogs();
-
     </script>
 
-
 </body>
-
 </html>
