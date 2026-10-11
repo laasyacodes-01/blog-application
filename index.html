@@ -1,158 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Blog</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A place to write, read, and share ideas with the world.">
+  <title>My Blog | Stories Worth Sharing</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
 
-    <nav>
-        <h2>My Blog</h2>
-        <div>
-            <a href="index.html">Home</a>
-            <a href="dashboard.html">Dashboard</a>
-            <a href="create-blog.html">Create Blog</a>
-            <a href="login.html">Login</a>
-            <a href="register.html">Register</a>
-        </div>
-    </nav>
+  <nav>
+    <h2>My Blog<span class="highlight">.</span></h2>
+    <div>
+      <a href="index.html">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="create-blog.html">Create Blog</a>
+      <a href="login.html">Login</a>
+      <a href="register.html" class="button">Get Started</a>
+    </div>
+  </nav>
 
+  <main>
     <section class="hero">
-        <h1>Welcome to My Blog</h1>
-        <p>Read, write and share your thoughts with the world.</p>
-        <a href="create-blog.html" class="button">Start Writing</a>
+      <p class="eyebrow">WELCOME TO YOUR CREATIVE SPACE</p>
+      <h1>Turn your ideas into<br>
+        <span class="highlight">stories worth sharing.</span>
+      </h1>
+      <p class="hero-description">
+        Every thought has a story. Write yours, discover new perspectives,
+        and make your ideas matter.
+      </p>
+      <div class="hero-actions">
+        <a href="create-blog.html" class="button">Start Writing &rarr;</a>
+        <a href="#latest" class="text-link">Explore stories &darr;</a>
+      </div>
+      <div class="hero-note">
+        <span class="note-dot"></span>
+        YOUR SPACE. YOUR IDEAS. YOUR STORY.
+      </div>
     </section>
 
     <section class="about">
-        <h2>Share Your Ideas</h2>
-        <p>
-            Create your own blogs, share your ideas,
-            and keep your thoughts organized in one place.
-        </p>
+      <p class="eyebrow">WHY WRITE WITH US?</p>
+      <h2>Your thoughts deserve a place.</h2>
+      <p>
+        Turn the things you learn, feel, and imagine into stories you can
+        keep and share.
+      </p>
     </section>
 
     <section class="features">
+      <div class="feature-card">
+        <span class="feature-number">01</span>
+        <h2>✍️ Write freely</h2>
+        <p>Put your ideas into words and create blog posts that reflect you.</p>
+      </div>
 
-        <div class="feature-card">
-            <h2>✍️ Write</h2>
-            <p>Create and publish your own blog posts.</p>
-        </div>
+      <div class="feature-card">
+        <span class="feature-number">02</span>
+        <h2>📖 Discover ideas</h2>
+        <p>Revisit your posts and explore thoughts worth remembering.</p>
+      </div>
 
-        <div class="feature-card">
-            <h2>📖 Read</h2>
-            <p>Read interesting blog posts and discover new ideas.</p>
-        </div>
-
-        <div class="feature-card">
-            <h2>🚀 Share</h2>
-            <p>Share your ideas and stories with others.</p>
-        </div>
-
+      <div class="feature-card">
+        <span class="feature-number">03</span>
+        <h2>🚀 Keep growing</h2>
+        <p>Build your collection of stories, experiences, and knowledge.</p>
+      </div>
     </section>
 
-    <section class="home-blogs">
-        <h2>Latest Blogs</h2>
-        <div id="homeBlogDisplay"></div>
+    <section class="home-blogs" id="latest">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">FRESH FROM YOUR JOURNAL</p>
+          <h2>Latest Blogs<span class="highlight">.</span></h2>
+        </div>
+        <a href="dashboard.html" class="text-link">View dashboard &rarr;</a>
+      </div>
+
+      <div id="homeBlogDisplay">
+        <p>Loading your stories...</p>
+      </div>
     </section>
+  </main>
 
-    <script>
-        async function loadHomeBlogs() {
+  <footer>
+    <p>Made for ideas that deserve to be shared.</p>
+    <p>&copy; 2026 My Blog</p>
+  </footer>
 
-            const display = document.getElementById("homeBlogDisplay");
-            const token = localStorage.getItem("token");
+  <script>
+    async function loadHomeBlogs() {
+      const display = document.getElementById("homeBlogDisplay");
+      const token = localStorage.getItem("token");
 
-            // Require login before displaying blogs.
-            if (!token) {
-                display.innerHTML = `
-                    <div class="blog-card">
-                        <p>Please log in to view the latest blogs.</p>
-                        <a href="login.html" class="button">Login</a>
-                    </div>
-                `;
-                return;
+      if (!token) {
+        display.innerHTML = `
+          <div class="blog-card">
+            <h3>Your next story starts here.</h3>
+            <p>Log in to see your blogs and continue writing.</p>
+            <a href="login.html" class="button">Login to continue</a>
+          </div>`;
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          "https://blog-application-2-ig7h.onrender.com/api/blogs",
+          {
+            method: "GET",
+            headers: {
+              "Authorization": "Bearer " + token
             }
+          }
+        );
 
-            try {
-                const response = await fetch(
-                    "https://blog-application-2-ig7h.onrender.com/api/blogs",
-                    {
-                        method: "GET",
-                        headers: {
-                            "Authorization": "Bearer " + token
-                        }
-                    }
-                );
-
-                if (response.status === 401 || response.status === 403) {
-                    display.innerHTML = `
-                        <div class="blog-card">
-                            <p>Your login session has expired. Please log in again.</p>
-                            <a href="login.html" class="button">Login</a>
-                        </div>
-                    `;
-                    return;
-                }
-
-                if (!response.ok) {
-                    throw new Error("Unable to fetch blogs");
-                }
-
-                const blogs = await response.json();
-
-                display.innerHTML = "";
-
-                if (!blogs || blogs.length === 0) {
-                    display.innerHTML = "<p>No blogs found in your account.</p>";
-                    return;
-                }
-
-                blogs.forEach(function (blog) {
-
-                    const card = document.createElement("div");
-                    card.className = "blog-card";
-
-                    const title = document.createElement("h3");
-                    title.textContent = blog.title || "Untitled";
-
-                    const author = document.createElement("p");
-                    author.textContent = "Author: " + (blog.author || "Unknown");
-
-                    const content = document.createElement("p");
-                    const fullContent = blog.content || "";
-                    content.textContent = fullContent.length > 150
-                        ? fullContent.substring(0, 150) + "..."
-                        : fullContent;
-
-                    const link = document.createElement("a");
-                    link.href = "blog-details.html?id=" + encodeURIComponent(blog.id);
-                    link.className = "button";
-                    link.textContent = "Read More";
-
-                    card.appendChild(title);
-                    card.appendChild(author);
-                    card.appendChild(content);
-                    card.appendChild(link);
-
-                    display.appendChild(card);
-                });
-
-            } catch (error) {
-                console.error("Home blogs error:", error);
-
-                display.innerHTML = `
-                    <div class="blog-card">
-                        <p>Unable to load blogs right now. Please try again later.</p>
-                    </div>
-                `;
-            }
+        if (response.status === 401 || response.status === 403) {
+          display.innerHTML = `
+            <div class="blog-card">
+              <h3>Your session has expired</h3>
+              <p>Please log in again to view your stories.</p>
+              <a href="login.html" class="button">Login again</a>
+            </div>`;
+          return;
         }
 
-        loadHomeBlogs();
-    </script>
+        if (!response.ok) {
+          throw new Error("Unable to fetch blogs");
+        }
+
+        const blogs = await response.json();
+        display.innerHTML = "";
+
+        if (!Array.isArray(blogs) || blogs.length === 0) {
+          display.innerHTML = `
+            <div class="blog-card">
+              <h3>Your story collection begins here.</h3>
+              <p>You haven't published a blog yet. Create your first one!</p>
+              <a href="create-blog.html" class="button">Create your first blog</a>
+            </div>`;
+          return;
+        }
+
+        blogs.forEach(function(blog) {
+          const card = document.createElement("article");
+          card.className = "blog-card";
+
+          const label = document.createElement("p");
+          label.className = "eyebrow";
+          label.textContent = "FROM YOUR JOURNAL";
+
+          const title = document.createElement("h3");
+          title.textContent = blog.title || "Untitled";
+
+          const author = document.createElement("p");
+          author.className = "blog-author";
+          author.textContent = "By " + (blog.author || "Unknown author");
+
+          const content = document.createElement("p");
+          const fullContent = blog.content || "";
+          content.textContent = fullContent.length > 160
+            ? fullContent.substring(0, 160) + "..."
+            : fullContent;
+
+          const link = document.createElement("a");
+          link.href = "blog-details.html?id=" + encodeURIComponent(blog.id);
+          link.className = "button";
+          link.textContent = "Read More →";
+
+          card.appendChild(label);
+          card.appendChild(title);
+          card.appendChild(author);
+          card.appendChild(content);
+          card.appendChild(link);
+
+          display.appendChild(card);
+        });
+
+      } catch (error) {
+        console.error("Home blogs error:", error);
+        display.innerHTML = `
+          <div class="blog-card">
+            <h3>Stories are taking a little break.</h3>
+            <p>We couldn't load your blogs right now. Please refresh and try again.</p>
+          </div>`;
+      }
+    }
+
+    loadHomeBlogs();
+  </script>
 
 </body>
 </html>
